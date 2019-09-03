@@ -1,0 +1,155 @@
+GPERFTOOLS_COPTS = [
+    "-Wall",
+    "-Wwrite-strings",
+    "-Woverloaded-virtual",
+    "-Wno-sign-compare",
+    "-fno-builtin-malloc",
+    "-fno-builtin-free",
+    "-fno-builtin-realloc",
+    "-fno-builtin-calloc",
+    "-fno-builtin-cfree",
+    "-fno-builtin-memalign",
+    "-fno-builtin-posix_memalign",
+    "-fno-builtin-valloc",
+    "-fno-builtin-pvalloc",
+    "-Wno-unused-result",
+    "-fsized-deallocation",
+]
+
+GPERFTOOLS_DEFINES = [
+    "NO_FRAME_POINTER",
+    "HAVE_CONFIG_H",
+]
+
+GPERFTOOLS_LINKOPTS = []  # ["-no-undefined"]
+
+cc_library(
+    name = "sysinfo",
+    srcs = [
+        "src/base/arm_instruction_set_select.h",
+        "src/base/sysinfo.cc",
+        "src/base/sysinfo.h",
+        "src/config.h",
+        "src/getenv_safe.h",
+    ],
+    copts = GPERFTOOLS_COPTS,
+    defines = GPERFTOOLS_DEFINES,
+    includes = ["src"],
+    linkopts = GPERFTOOLS_LINKOPTS,
+    deps = [
+        ":logging",
+    ],
+)
+
+cc_library(
+    name = "dynamic_annotations",
+    srcs = [
+        "src/base/dynamic_annotations.c",
+        "src/config.h",
+        "src/getenv_safe.h",
+        "src/third_party/valgrind.h",
+    ],
+    hdrs = [
+        "src/base/dynamic_annotations.h",
+    ],
+    defines = ["HAVE_CONFIG_H"],
+    includes = ["src"],
+)
+
+cc_library(
+    name = "logging",
+    srcs = [
+        "src/base/logging.cc",
+        "src/config.h",
+    ],
+    hdrs = [
+        "src/base/basictypes.h",
+        "src/base/commandlineflags.h",
+        "src/base/logging.h",
+    ],
+    copts = GPERFTOOLS_COPTS,
+    defines = GPERFTOOLS_DEFINES,
+    includes = ["src"],
+    linkopts = GPERFTOOLS_LINKOPTS,
+    deps = [":dynamic_annotations"],
+)
+
+cc_library(
+    name = "maybe_threads",
+    srcs = [
+        "src/config.h",
+        "src/maybe_threads.cc",
+    ],
+    hdrs = ["src/maybe_threads.h"],
+    copts = GPERFTOOLS_COPTS,
+    defines = GPERFTOOLS_DEFINES,
+    includes = ["src"],
+    linkopts = GPERFTOOLS_LINKOPTS + ["-lpthread"],
+    deps = [
+        ":logging",
+    ],
+)
+
+cc_library(
+    name = "spinlock",
+    srcs = [
+        "src/base/atomicops-internals-linuxppc.h",
+        "src/base/atomicops-internals-macosx.h",
+        "src/base/atomicops-internals-windows.h",
+        "src/base/atomicops-internals-x86.cc",
+        "src/base/atomicops-internals-x86.h",
+        "src/base/googleinit.h",
+        "src/base/linux_syscall_support.h",
+        "src/base/spinlock.cc",
+        "src/base/spinlock_internal.cc",
+        "src/base/spinlock_internal.h",
+        "src/base/spinlock_linux-inl.h",
+        "src/config.h",
+    ],
+    hdrs = [
+        "src/base/atomicops.h",
+        "src/base/spinlock.h",
+        "src/base/thread_annotations.h",
+    ],
+    copts = GPERFTOOLS_COPTS,
+    defines = GPERFTOOLS_DEFINES,
+    includes = ["src"],
+    linkopts = GPERFTOOLS_LINKOPTS + ["-lpthread"],
+    deps = [
+        ":sysinfo",
+    ],
+)
+
+cc_library(
+    name = "stacktrace",
+    srcs = [
+        "src/base/elf_mem_image.cc",
+        "src/base/elf_mem_image.h",
+        "src/base/googleinit.h",
+        "src/base/vdso_support.cc",
+        "src/base/vdso_support.h",
+        "src/config.h",
+        "src/stacktrace.cc",
+        "src/stacktrace_arm-inl.h",
+        "src/stacktrace_generic-inl.h",
+        "src/stacktrace_impl_setup-inl.h",
+        "src/stacktrace_instrument-inl.h",
+        "src/stacktrace_libgcc-inl.h",
+        "src/stacktrace_libunwind-inl.h",
+        "src/stacktrace_powerpc-darwin-inl.h",
+        "src/stacktrace_powerpc-inl.h",
+        "src/stacktrace_powerpc-linux-inl.h",
+        "src/stacktrace_win32-inl.h",
+        "src/stacktrace_x86-inl.h",
+    ],
+    hdrs = [
+        "src/gperftools/stacktrace.h",
+    ],
+    copts = GPERFTOOLS_COPTS,
+    defines = GPERFTOOLS_DEFINES,
+    includes = ["src"],
+    linkopts = GPERFTOOLS_LINKOPTS + ["-lunwind"],
+    deps = [
+        ":logging",
+    ],
+)
